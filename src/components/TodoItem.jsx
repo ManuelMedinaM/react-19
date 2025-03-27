@@ -1,4 +1,4 @@
-import { useOptimistic, useState, useTransition, useRef, useEffect } from 'react';
+import { useOptimistic, useState, useTransition } from 'react';
 import { CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { updateTodo, deleteTodo } from '../../server/api';
 
@@ -7,20 +7,12 @@ export default function TodoItem({ todo, category, priority }) {
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState(null);
   
-  // Usamos useRef para guardar una copia del estado original para manual reversion
-  const originalStateRef = useRef(todo);
-  
-  // Actualizamos la ref cuando todo cambia
-  useEffect(() => {
-    originalStateRef.current = todo;
-  }, [todo]);
-  
+
   // Use optimistic for immediate UI updates
   const [optimisticTodo, setOptimisticTodo] = useOptimistic(
     todo,
     (currentTodo, newValues) => ({ ...currentTodo, ...newValues })
   );
-
   // Toggle todo completion
   async function toggleTodo() {
     // Limpiar cualquier mensaje de error anterior
@@ -53,7 +45,7 @@ export default function TodoItem({ todo, category, priority }) {
         // Revertir manualmente en lugar de lanzar el error
         // Normalmente useOptimistic lo haría automáticamente si lanzamos el error
         // pero queremos evitar propagar errores fuera del componente
-        setOptimisticTodo({ completed: originalStateRef.current.completed });
+        // setOptimisticTodo({ completed: originalStateRef.current.completed });
         
         // No lanzamos el error fuera de este bloque try/catch
       }

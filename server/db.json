@@ -1,22 +1,8 @@
 {
   "todos": [
     {
-      "id": "613f",
-      "title": "cccccc",
-      "completed": true,
-      "category": "react19",
-      "priority": "medium"
-    },
-    {
-      "id": "693f",
-      "title": "aaaaaaaaaa",
-      "completed": true,
-      "category": "react19",
-      "priority": "medium"
-    },
-    {
-      "id": "92d3",
-      "title": "aaaaaaaa",
+      "id": "79df",
+      "title": "aaaaa",
       "completed": false,
       "category": "react19",
       "priority": "medium"

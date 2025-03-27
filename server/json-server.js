@@ -1,17 +1,20 @@
 // JSON Server configuration
-import jsonServer from 'json-server';
+import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import routes from './routes.js';
 
 /* global process */
 
+const require = createRequire(import.meta.url);
+const jsonServer = require('json-server');
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Create server
 const server = jsonServer.create();
-const router = jsonServer.router(join(__dirname, '../db.json'));
+const router = jsonServer.router(join(__dirname, './db.json'));   
 const middlewares = jsonServer.defaults({
   static: join(__dirname, 'public')
 });
@@ -22,6 +25,13 @@ server.use(jsonServer.bodyParser);
 
 // Setup custom routes
 routes(server);
+
+// Add cats endpoint that returns todos list
+server.get('/cats', (req, res) => {
+  const db = router.db;
+  const todos = db.get('todos').value();
+  res.jsonp(todos);
+});
 
 // Use default router
 server.use(router);

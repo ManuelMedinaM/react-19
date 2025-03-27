@@ -49,11 +49,15 @@ export default function AddTodo() {
       // Añadir retraso deliberado para mejor visualización del estado pendiente
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      await addTodo(newTodo);
-      // Refresh the todo list after adding a new todo
+      // Añadir el todo en el servidor
+      const addedTodo = await addTodo(newTodo);
+      
+      // Para nuevos todos, sí necesitamos refrescar la lista
+      // ya que necesitamos que aparezca el nuevo elemento
       todos.refresh();
+      
       // Form will reset automatically for uncontrolled inputs when action succeeds
-      return { success: true, error: null };
+      return { success: true, error: null, todo: addedTodo };
     } catch (error) {
       console.error('Error adding todo:', error);
       return { error: 'Failed to add todo', success: false };

@@ -97,7 +97,7 @@ function App() {
                       <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto"></div>
                     </div>
                   </div>
-                }>
+                } unstable_avoidThisFallback={true}>
                   <TodoList />
                 </Suspense>
                 

@@ -344,6 +344,151 @@ function MyComponent() {
 
 Esta optimización automática hace que el código sea más limpio y fácil de mantener, al tiempo que mejora el rendimiento sin esfuerzo adicional por parte del desarrollador.
 
+## 14. Prevención de Parpadeos con `useDeferredValue`
+
+**Implementación:** [TodoList.jsx](/src/components/TodoList.jsx), [useTodos.js](/src/hooks/useTodos.js)
+- Utiliza `useDeferredValue` para mantener una versión previa de los datos mientras se cargan los nuevos.
+- Proporciona una transición visual suave con indicadores de actualización.
+- Compara el valor diferido con el actual para mostrar estados de carga.
+
+```jsx
+// En TodoList.jsx
+function TodoList() {
+  const { todos, categoriesPromise, prioritiesPromise } = useTodoContext();
+  
+  // Cargar los datos con use()
+  const todoItems = use(todos.todosPromise);
+  
+  // Mantener una versión diferida para actualizaciones suaves
+  const deferredTodoItems = useDeferredValue(todoItems);
+  
+  // Detectar si hay una actualización en progreso
+  const isUpdating = deferredTodoItems !== todoItems;
+  
+  return (
+    <div className={isUpdating ? "opacity-80 transition-opacity" : ""}>
+      {isUpdating && <div className="indicator">Actualizando...</div>}
+      
+      <ul>
+        {/* Renderizar usando deferredTodoItems para prevenir parpadeos */}
+        {deferredTodoItems.map(todo => (
+          <TodoItem key={todo.id} todo={todo} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+**¿Por qué es mejor en React 19?**
+- React 19 optimiza el manejo de `useDeferredValue`, permitiendo transiciones más fluidas.
+- La detección de si hay una diferencia entre la versión actual y la diferida permite interfaces más reactivas.
+- Trabaja perfectamente con Suspense y actualizaciones optimistas.
+
+## 15. Optimización de Actualizaciones con `startTransition` en Hooks Personalizados
+
+**Implementación:** [useTodos.js](/src/hooks/useTodos.js)
+- Integra `useTransition` dentro de un hook personalizado para mejorar todas las operaciones de actualización.
+- Evita que Suspense se active durante actualizaciones pequeñas.
+- Proporciona información sobre el estado pendiente a través del hook.
+
+```jsx
+// En useTodos.js
+export function useTodos() {
+  const [todosPromise, setTodosPromise] = useState(() => fetchTodos());
+  const [isPending, startTransition] = useTransition();
+  
+  const todosAPI = {
+    todosPromise,
+    isPending, // Exponemos el estado de pendiente
+    
+    refresh: () => {
+      // Usamos startTransition para actualizaciones suaves
+      startTransition(() => {
+        setTodosPromise(fetchTodos());
+      });
+    },
+    
+    filterBy: (filterType) => {
+      startTransition(() => {
+        setTodosPromise(fetchTodos({ completed: filterType === 'completed' }));
+      });
+    }
+  };
+
+  return todosAPI;
+}
+```
+
+**Mejoras en React 19:**
+- React 19 prioriza automáticamente las actualizaciones dentro de transiciones, mejorando la experiencia de usuario.
+- Las transiciones permiten mantener la UI interactiva mientras ocurren operaciones costosas.
+- La integración de transiciones dentro de un hook personalizado proporciona un patrón reutilizable para toda la aplicación.
+
+## 16. Control Avanzado de Suspense para Evitar Parpadeos Innecesarios
+
+**Implementación:** [App.jsx](/src/App.jsx)
+- Utiliza la nueva propiedad `unstable_avoidThisFallback` para evitar que Suspense muestre su fallback durante actualizaciones.
+- Permite suspensiones iniciales pero previene suspensiones innecesarias durante actualizaciones.
+- Complementa el uso de `useTransition` y `useDeferredValue` para una experiencia perfecta.
+
+```jsx
+// En App.jsx
+<Suspense 
+  fallback={<LoadingFallback />} 
+  unstable_avoidThisFallback={true} // Nueva propiedad en React 19
+>
+  <TodoList />
+</Suspense>
+```
+
+**Funcionalidad específica de React 19:**
+- La propiedad `unstable_avoidThisFallback` es parte de las nuevas API de React 19 para un control más granular de Suspense.
+- Permite que los componentes suspendan durante la carga inicial, pero evita mostrar fallbacks para suspensiones posteriores.
+- Trabaja en conjunto con `useTransition` para proporcionar una experiencia de carga más intuitiva.
+- Su comportamiento es inteligente: mantiene el contenido actual visible mientras los nuevos datos se cargan en segundo plano.
+
+## 17. Mejoras en Manejo de Datos en Formularios con `useActionState`
+
+**Implementación:** [AddTodo.jsx](/src/components/AddTodo.jsx)
+- Utiliza `useActionState` para gestionar el estado del formulario y las operaciones asíncronas.
+- Devuelve datos enriquecidos (incluido el todo creado) después de operaciones exitosas.
+- Integra con transiciones para actualizaciones suaves del estado.
+
+```jsx
+// En AddTodo.jsx
+async function handleAddTodo(previousState, formData) {
+  // Extraer y validar datos
+  const title = formData.get('title');
+  if (!title || title.trim() === '') {
+    return { error: 'Title cannot be empty' };
+  }
+  
+  try {
+    // Añadir el todo en el servidor
+    const addedTodo = await addTodo(newTodo);
+    
+    // Actualizar la lista
+    todos.refresh();
+    
+    // Devolver el todo creado junto con el estado de éxito
+    // Esto permite acceder al todo recién creado si se necesita
+    return { success: true, error: null, todo: addedTodo };
+  } catch (error) {
+    return { error: 'Failed to add todo', success: false };
+  }
+}
+
+// Uso del hook con la función de acción
+const [formState, submitAction, isPending] = useActionState(handleAddTodo, null);
+```
+
+**Ventajas en React 19:**
+- `useActionState` en React 19 proporciona una experiencia más completa para operaciones asíncronas.
+- Permite devolver datos estructurados (como el todo creado) que pueden usarse para actualizaciones optimistas.
+- Se integra perfectamente con el nuevo sistema de acciones en formularios de React 19.
+- Trabaja en conjunto con `useTransition` para operaciones asíncronas de mayor rendimiento.
+
 ## ¿Cómo probar estas características?
 
 1. Navega por la aplicación y prueba las diferentes funcionalidades.

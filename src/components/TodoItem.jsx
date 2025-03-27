@@ -23,6 +23,7 @@ export default function TodoItem({ todo, category, priority }) {
     startTransition(async () => {
       try {
         // 1. Aplicar la actualización optimista inmediatamente
+        // Esto actualiza la UI de forma instantánea
         setOptimisticTodo({ completed: !todo.completed });
         
         // 2. Retraso deliberado para demostración
@@ -36,12 +37,12 @@ export default function TodoItem({ todo, category, priority }) {
         // 4. Realizar la actualización real en el servidor
         await updateTodo(todo.id, { completed: !todo.completed });
         
-        // 5. Refrescar la lista después de actualizar
+        // 5. Debemos refrescar la lista para que los cambios persistan
+        // Nuestro enfoque anterior estaba causando pérdida de sincronización
         todos.refresh();
       } catch (error) {
         console.error('Error updating todo:', error);
         setErrorMessage(error.message);
-        // No propagar el error, solo registrarlo y mostrar el mensaje
       }
     });
   }
@@ -61,7 +62,8 @@ export default function TodoItem({ todo, category, priority }) {
           throw new Error("Failed to delete todo");
         }
         
-        // Eliminar la tarea y refrescar la lista
+        // Para eliminaciones sí necesitamos refrescar la lista 
+        // porque el item desaparece por completo
         await deleteTodo(todo.id);
         todos.refresh();
       } catch (error) {

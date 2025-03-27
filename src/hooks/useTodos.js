@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { fetchTodos } from '../../server/api';
 
 /**
@@ -9,6 +9,7 @@ import { fetchTodos } from '../../server/api';
  */
 export function useTodos() {
   const [todosPromise, setTodosPromise] = useState(() => fetchTodos());
+  const [isPending, startTransition] = useTransition();
   
   // En React 19, las funciones creadas durante el renderizado se mantienen estables
   // automáticamente sin necesidad de useMemo cuando los parámetros no cambian
@@ -17,15 +18,25 @@ export function useTodos() {
     // La promesa actual de todos
     todosPromise,
     
+    // Estado de pendiente durante actualizaciones
+    isPending,
+    
     // Función para refrescar los todos (obtener datos actualizados)
     refresh: () => {
-      setTodosPromise(fetchTodos());
+      // Usamos startTransition para mejorar la experiencia de usuario
+      // durante las actualizaciones, evitando que el Suspense muestre
+      // su fallback para actualizaciones pequeñas
+      startTransition(() => {
+        setTodosPromise(fetchTodos());
+      });
     },
     
     // Función para obtener todos filtrados por un criterio (ej: completadas)
     filterBy: (filterType) => {
-      // Actualizamos la promesa con la nueva consulta filtrada
-      setTodosPromise(fetchTodos({ completed: filterType === 'completed' }));
+      // También usamos startTransition para los filtros
+      startTransition(() => {
+        setTodosPromise(fetchTodos({ completed: filterType === 'completed' }));
+      });
     }
   };
 

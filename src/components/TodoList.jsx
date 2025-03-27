@@ -1,7 +1,7 @@
 import { use, useContext } from 'react';
 import { TodoContext } from './TodoContext';
 import TodoItem from './TodoItem';
-import { fetchTodos, fetchCategories, fetchPriorities } from '../server/api';
+import { fetchTodos, fetchCategories, fetchPriorities } from '../../server/api';
 
 // Create promises outside of the component to prevent re-creation during render
 // This avoids the infinite suspension cycle

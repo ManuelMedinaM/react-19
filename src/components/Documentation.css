@@ -1,0 +1,172 @@
+.documentation-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.doc-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #4f46e5;
+  margin: 0;
+}
+
+.doc-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.doc-action-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.doc-action-button:hover {
+  background-color: #4338ca;
+}
+
+.doc-back-button {
+  background-color: #f3f4f6;
+  color: #4f46e5;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.doc-back-button:hover {
+  background-color: #e5e7eb;
+  color: #4338ca;
+}
+
+.doc-content {
+  line-height: 1.6;
+}
+
+/* Estilos específicos para los elementos del markdown */
+.doc-content h1 {
+  font-size: 2.2rem;
+  margin-top: 2em;
+  margin-bottom: 0.8em;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.3em;
+}
+
+.doc-content h2 {
+  font-size: 1.8rem;
+  margin-top: 1.8em;
+  margin-bottom: 0.8em;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.2em;
+}
+
+.doc-content h3 {
+  font-size: 1.5rem;
+  margin-top: 1.5em;
+  margin-bottom: 0.6em;
+}
+
+.doc-content a {
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.doc-content a:hover {
+  text-decoration: underline;
+}
+
+.doc-content code {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.9em;
+}
+
+.doc-content pre {
+  margin: 1.5em 0;
+  border-radius: 6px;
+  overflow: auto;
+}
+
+.doc-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0;
+}
+
+.doc-content table, .doc-content th, .doc-content td {
+  border: 1px solid #e5e7eb;
+}
+
+.doc-content th, .doc-content td {
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.doc-content th {
+  background-color: #f8fafc;
+}
+
+.doc-content tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.doc-content ul, .doc-content ol {
+  padding-left: 2em;
+}
+
+.doc-content li {
+  margin-bottom: 0.5em;
+}
+
+.doc-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  margin-left: 0;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .documentation-container {
+    padding: 15px;
+  }
+  
+  .doc-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .doc-content h1 {
+    font-size: 1.8rem;
+  }
+  
+  .doc-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .doc-content h3 {
+    font-size: 1.2rem;
+  }
+} 

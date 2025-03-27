@@ -1,6 +1,6 @@
 import { useOptimistic, useState, useTransition, useRef, useEffect } from 'react';
 import { CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { updateTodo, deleteTodo } from '../server/api';
+import { updateTodo, deleteTodo } from '../../server/api';
 
 export default function TodoItem({ todo, category, priority }) {
   const [simulateError, setSimulateError] = useState(false);

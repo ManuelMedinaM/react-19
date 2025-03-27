@@ -13,7 +13,10 @@ export default defineConfig({
   server: {
     port: 5173,
     // Configurar el historial de modo que todas las rutas se dirijan a index.html
-    historyApiFallback: true
+    historyApiFallback: true,
+    watch: {
+      ignored: ['**/server/**']
+    }
   },
   publicDir: 'public',
   // Copiar README.md al directorio public durante el build

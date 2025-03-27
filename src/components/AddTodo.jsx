@@ -1,23 +1,21 @@
+import { use } from 'react';
+import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { use, useActionState } from 'react';
-import { addTodo, fetchCategories, fetchPriorities } from '../../server/api';
+import { addTodo } from '../../server/api';
+import { useTodoContext } from './TodoContext';
 
-// Create promises outside of the component to prevent re-creation during render
-// This avoids the infinite suspension cycle
-const categoriesPromise = fetchCategories();
-const prioritiesPromise = fetchPriorities();
-
-// Submit button component that shows loading state
+// Submit button component that uses the form status
 function SubmitButton() {
-  // Using React 19's useFormStatus hook to access form submission state
   const { pending } = useFormStatus();
   
   return (
     <button 
       type="submit" 
       disabled={pending}
-      className={`px-4 py-2 text-white rounded-lg transition-all duration-200 ${
-        pending ? 'bg-indigo-400 animate-pulse' : 'bg-indigo-600 hover:bg-indigo-700 shadow-md'
+      className={`px-4 py-2 rounded-lg text-white font-medium shadow-sm transition-colors duration-200 ${
+        pending 
+          ? 'bg-indigo-400 cursor-not-allowed' 
+          : 'bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800'
       }`}
     >
       {pending ? 'Adding...' : 'Add Todo'}
@@ -26,7 +24,9 @@ function SubmitButton() {
 }
 
 export default function AddTodo() {
-  // Using the 'use' API to read the promises
+  const { todos, categoriesPromise, prioritiesPromise } = useTodoContext();
+  
+  // Using the promises directly with use()
   const categories = use(categoriesPromise);
   const priorities = use(prioritiesPromise);
   
@@ -50,6 +50,8 @@ export default function AddTodo() {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       await addTodo(newTodo);
+      // Refresh the todo list after adding a new todo
+      todos.refresh();
       // Form will reset automatically for uncontrolled inputs when action succeeds
       return { success: true, error: null };
     } catch (error) {

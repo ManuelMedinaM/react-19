@@ -31,30 +31,41 @@ function MarkdownContent() {
 - El orden es crucial: primero la actualización optimista, luego la operación asíncrona.
 - La actualización optimista debe ser inmediata para que el usuario vea el cambio sin esperar.
 - `useTransition` se utiliza para gestionar el estado pendiente (isPending).
-- Hay dos opciones para manejar errores con useOptimistic:
-  1. **Opción 1 - Reversión automática**: Lanzar el error dentro de la transición para que `useOptimistic` revierta automáticamente.
-  2. **Opción 2 - Reversión manual**: Almacenar el estado original y revertir manualmente sin propagar el error.
+- useOptimistic revierte automáticamente al estado original cuando finaliza la transición, independientemente del resultado:
+  - No es necesario propagar el error para que revierta al estado original.
+  - La reversión al estado original ocurre automáticamente si la transición termina sin actualizar permanentemente el estado.
+  - El manejo de errores es independiente de la reversión automática del estado optimista.
 
 ```jsx
-// En TodoItem.jsx
-const [optimisticTodo, addOptimistic] = useOptimistic(
+// En TodoItem.jsx - Manejo correcto de errores con useOptimistic
+const [optimisticTodo, setOptimisticTodo] = useOptimistic(
   todo,
-  (state, newCompleted) => ({ ...state, completed: newCompleted })
+  (currentTodo, newValues) => ({ ...currentTodo, ...newValues })
 );
 
-const toggleTodo = () => {
-  // Actualización optimista y transición
-  const newCompleted = !optimisticTodo.completed;
+async function toggleTodo() {
+  setErrorMessage(null);
+  
   startTransition(async () => {
     try {
-      // Si falla, useOptimistic revierte automáticamente
-      await updateTodo(todo.id, { completed: newCompleted });
+      // 1. Aplicar la actualización optimista inmediatamente
+      setOptimisticTodo({ completed: !todo.completed });
+      
+      // 2. Realizar la actualización real en el servidor
+      await updateTodo(todo.id, { completed: !todo.completed });
+      
+      // 3. Refrescar la lista
+      todos.refresh();
     } catch (error) {
-      // El error se lanza y useOptimistic revierte
-      throw error;
+      // 4. Mostrar el error al usuario
+      console.error('Error updating todo:', error);
+      setErrorMessage(error.message);
+      
+      // No es necesario hacer nada especial aquí
+      // useOptimistic revierte automáticamente al completarse la transición
     }
   });
-};
+}
 ```
 
 ## 3. Integraciones en React DOM para Formularios
@@ -190,6 +201,148 @@ function RefExample() {
 
 **Implementación:** [RefExample.jsx](/src/components/RefExample.jsx)
 - Permite limpiar recursos cuando un componente se desmonta o la ref cambia.
+
+## 12. Mecanismo de Refresco Eficiente con React 19 usando Custom Hooks
+
+**Implementación:** [TodoContext.jsx](/src/components/TodoContext.jsx), [TodoList.jsx](/src/components/TodoList.jsx), [TodoItem.jsx](/src/components/TodoItem.jsx), [AddTodo.jsx](/src/components/AddTodo.jsx), [useTodos.js](/src/hooks/useTodos.js)
+- Utiliza un hook personalizado `useTodos` para centralizar la lógica de gestión de tareas.
+- Separa inteligentemente datos estáticos (categorías y prioridades) de datos dinámicos (tareas).
+- Expone una API clara y coherente para manipular los todos.
+- Sigue el patrón recomendado de React 19 para usar promesas con `use()`.
+- Aprovecha las optimizaciones automáticas de React 19 para funciones.
+- Maneja el filtrado de manera eficiente en el contexto, evitando filtrados redundantes en componentes.
+
+```jsx
+// En useTodos.js - Hook personalizado para todos sin useMemo
+/**
+ * Hook personalizado para gestionar los todos
+ */
+export function useTodos() {
+  const [todosPromise, setTodosPromise] = useState(() => fetchTodos());
+  
+  // React 19 mantiene la estabilidad de las funciones automáticamente
+  // cuando se crean durante el renderizado
+  const todosAPI = {
+    // La promesa actual de todos
+    todosPromise,
+    
+    // Función para refrescar los todos
+    refresh: () => {
+      setTodosPromise(fetchTodos());
+    },
+    
+    // Función para filtrar todos
+    filterBy: (filterType) => {
+      setTodosPromise(fetchTodos({ completed: filterType === 'completed' }));
+    }
+  };
+
+  return todosAPI;
+}
+
+// En TodoContext.jsx - Context provider con filtrado centralizado
+export function TodoProvider({ children }) {
+  const [filter, setFilter] = useState('all');
+  // Usamos el hook personalizado
+  const todos = useTodos();
+  
+  // Sincronizamos el filtro con la API de todos
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    if (newFilter !== 'all') {
+      todos.filterBy(newFilter);
+    } else {
+      todos.refresh();
+    }
+  };
+  
+  return (
+    <TodoContext value={{ 
+      filter, 
+      setFilter: handleFilterChange,
+      categoriesPromise,
+      prioritiesPromise,
+      todos
+    }}>
+      {children}
+    </TodoContext>
+  );
+}
+
+// En TodoList.jsx - Consumir datos ya filtrados
+function TodoList() {
+  const { todos, categoriesPromise, prioritiesPromise } = useTodoContext();
+  
+  // Los datos ya vienen filtrados del contexto
+  const todoItems = use(todos.todosPromise);
+  const categories = use(categoriesPromise);
+  const priorities = use(prioritiesPromise);
+  
+  // No es necesario filtrar de nuevo en el componente
+}
+```
+
+**Aspectos importantes:**
+- La lógica de los todos está centralizada en el hook `useTodos`, siguiendo el principio de responsabilidad única.
+- El hook expone una API clara con métodos como `refresh()` y `filterBy()` para interactuar con los todos.
+- Los componentes no necesitan conocer los detalles de implementación, solo usan los métodos expuestos.
+- El hook `useTodoContext()` simplifica el acceso al contexto en cualquier componente.
+- Los datos estáticos (categorías y prioridades) siguen cargándose una sola vez.
+- React 19 optimiza automáticamente la estabilidad de las funciones creadas durante el renderizado, reduciendo la necesidad de usar `useMemo` en muchos casos.
+- Este patrón combina lo mejor de React 19 (hook `use` con promesas) y los patrones clásicos de React (custom hooks).
+
+## 13. Optimizaciones Automáticas de Funciones en React 19
+
+**Implementación:** [useTodos.js](/src/hooks/useTodos.js)
+- React 19 mejora la estabilidad de las funciones creadas durante el renderizado.
+- Reduce considerablemente la necesidad de `useMemo` y `useCallback` en muchos casos.
+- Las funciones se mantienen estables automáticamente cuando los parámetros no cambian entre renderizados.
+
+```jsx
+// En React 18 (necesitaba useMemo)
+function MyComponent() {
+  const [count, setCount] = useState(0);
+  
+  // Sin useMemo, handleClick se recrearía en cada renderizado
+  const callbacks = useMemo(() => ({
+    handleClick: () => {
+      console.log('Clicked!');
+      setCount(c => c + 1);
+    }
+  }), []);
+  
+  return <Button onClick={callbacks.handleClick} />;
+}
+
+// En React 19 (no necesita useMemo para este caso)
+function MyComponent() {
+  const [count, setCount] = useState(0);
+  
+  // La función mantiene su estabilidad automáticamente
+  const callbacks = {
+    handleClick: () => {
+      console.log('Clicked!');
+      setCount(c => c + 1);
+    }
+  };
+  
+  return <Button onClick={callbacks.handleClick} />;
+}
+```
+
+**Cuándo seguir usando useMemo/useCallback en React 19:**
+- Cuando necesites memoizar valores computados costosos basados en props o estado.
+- En componentes que renderizan grandes listas o tienen operaciones intensivas.
+- Cuando necesites garantizar la identidad de referencia para optimizaciones específicas.
+- En integraciones con librerías externas que dependen de la estabilidad de referencia.
+
+**Cuándo puedes prescindir de useMemo/useCallback:**
+- Para objetos simples de configuración o API como en nuestro caso `useTodos`.
+- Para manejadores de eventos que no dependan de props o estado que cambie frecuentemente.
+- En componentes que no necesitan optimizaciones adicionales de rendimiento.
+- Cuando el costo de la memoización es mayor que el beneficio (para funciones simples).
+
+Esta optimización automática hace que el código sea más limpio y fácil de mantener, al tiempo que mejora el rendimiento sin esfuerzo adicional por parte del desarrollador.
 
 ## ¿Cómo probar estas características?
 

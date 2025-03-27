@@ -107,7 +107,7 @@ function MyComponent() {
 **Implementación:** [TodoItem.jsx](./src/components/TodoItem.jsx)
 - Proporciona actualizaciones optimistas de la UI para una mejor experiencia de usuario
 - Actualiza inmediatamente el estado en la interfaz y luego sincroniza con el servidor
-- Revierte automáticamente al estado original si ocurre un error
+- Revierte automáticamente al estado original cuando finaliza la transición
 - **Nuevo:** Incluye un interruptor para simular errores, permitiendo ver cómo la interfaz revierte a su estado original cuando falla una operación
 - **Nuevo:** Implementa un retraso deliberado de 2 segundos para visualizar mejor el efecto de la actualización optimista
 
@@ -145,20 +145,19 @@ async function toggleTodo() {
       // Almacenar el error para mostrarlo en la UI
       setErrorMessage(error.message);
       
-      // Lanzar el error para que useOptimistic revierta automáticamente
-      throw error;
+      // No es necesario hacer nada especial aquí - la reversión es automática
+      // cuando finaliza la transición, independientemente del resultado
     }
   });
 }
 ```
 
 **Aspectos importantes:**
-- El orden es crucial: primero la actualización optimista, luego la operación asíncrona
-- La actualización optimista debe ser inmediata para que el usuario vea el cambio sin esperar
-- `useTransition` se utiliza para gestionar el estado pendiente (isPending)
-- Hay dos opciones para manejar errores con useOptimistic:
-  1. **Opción 1 - Reversión automática**: Lanzar el error dentro de la transición para que `useOptimistic` revierta automáticamente
-  2. **Opción 2 - Reversión manual**: Almacenar el estado original y revertir manualmente sin propagar el error
+- El orden es crucial: primero la actualización optimista, luego la operación asíncrona.
+- La actualización optimista debe ser inmediata para que el usuario vea el cambio sin esperar.
+- `useTransition` se utiliza para gestionar el estado pendiente (isPending).
+- useOptimistic revierte automáticamente al estado original cuando finaliza la transición si no se ha actualizado permanentemente el estado.
+- El manejo de errores es independiente de la reversión automática del estado optimista.
 
 ### 3. Integraciones en React DOM para Formularios
 
@@ -189,6 +188,93 @@ async function toggleTodo() {
 - Demuestra cómo los componentes funcionales pueden recibir refs a través de forwardRef
 - Compara con el enfoque anterior de reenvío de refs
 
+### 7. Custom Hooks y API Centralizada para Todos
+
+**Implementación:** [TodoContext.jsx](./src/components/TodoContext.jsx), [TodoList.jsx](./src/components/TodoList.jsx), [TodoItem.jsx](./src/components/TodoItem.jsx), [useTodos.js](./src/hooks/useTodos.js)
+- Utiliza el nuevo Context API de React 19 con un hook personalizado `useTodos`
+- Centraliza toda la lógica relacionada con los todos en un único lugar
+- Expone una API clara con métodos como `refresh()` y `filterBy()`
+- Combina las mejores prácticas de React 19 con patrones de diseño establecidos
+- Aprovecha las optimizaciones automáticas de funciones en React 19
+- Implementa un manejo robusto de errores que evita que los fallos rompan la UI
+
+**Implementación del Custom Hook:**
+```jsx
+// 1. Hook personalizado para centralizar la lógica de los todos
+export function useTodos() {
+  const [todosPromise, setTodosPromise] = useState(() => fetchTodos());
+  
+  // React 19 mantiene la estabilidad de las funciones automáticamente
+  // No es necesario usar useMemo para este caso
+  const todosAPI = {
+    // Promesa actual de todos
+    todosPromise,
+    
+    // Función para refrescar los datos
+    refresh: () => {
+      setTodosPromise(fetchTodos());
+    },
+    
+    // Función para filtrar los todos
+    filterBy: (filterType) => {
+      setTodosPromise(fetchTodos({ completed: filterType === 'completed' }));
+    }
+  };
+
+  return todosAPI;
+}
+
+// 2. Provider con filtrado centralizado
+export function TodoProvider({ children }) {
+  const [filter, setFilter] = useState('all');
+  const todos = useTodos();
+  
+  // Sincronizamos el filtro con los todos
+  // El filtrado ocurre aquí, no en los componentes hijos
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    if (newFilter !== 'all') {
+      todos.filterBy(newFilter);
+    } else {
+      todos.refresh();
+    }
+  };
+  
+  return <TodoContext value={{ filter, setFilter: handleFilterChange, todos, ... }}>{children}</TodoContext>;
+}
+
+// 3. Manejo robusto de errores en componentes
+function TodoItem() {
+  // Manejo correcto de errores con optimistic updates
+  async function toggleTodo() {
+    startTransition(async () => {
+      try {
+        setOptimisticTodo({ completed: !todo.completed });
+        await updateTodo(todo.id, { completed: !todo.completed });
+        todos.refresh();
+      } catch (error) {
+        // Mostrar el error al usuario
+        setErrorMessage(error.message);
+        // No es necesario hacer nada especial para la reversión
+        // useOptimistic lo hace automáticamente
+      }
+    });
+  }
+}
+```
+
+**Ventajas de este enfoque:**
+- **Separación de responsabilidades**: Toda la lógica de todos está en un solo lugar
+- **API declarativa**: Los componentes interactúan con una interfaz clara y predecible
+- **Menor acoplamiento**: Los componentes no necesitan conocer los detalles de implementación
+- **Testing más fácil**: El hook puede probarse de forma aislada
+- **Reutilización**: El hook puede usarse en cualquier parte de la aplicación
+- **Mantenibilidad**: Los cambios en la lógica de datos se hacen en un solo lugar
+- **Código más limpio**: Aprovecha las optimizaciones automáticas de React 19 para reducir boilerplate
+- **Manejo de errores robusto**: Los errores se capturan y gestionan sin romper la UI
+
+### 8. Integración con Suspense
+
 ## Simulación de Entornos Realistas
 
 Para demostrar con mayor claridad los estados y comportamientos de React 19, se han implementado varias técnicas de simulación:
@@ -213,56 +299,25 @@ Para demostrar con mayor claridad los estados y comportamientos de React 19, se 
 ### 4. Solución a errores comunes
 - **"An optimistic state update occurred outside a transition or action"**: Este error ocurre cuando se actualiza un estado optimista fuera de un contexto de transición. Para solucionarlo, debe usarse `startTransition` o una acción.
 
-- **Opciones para manejar errores con useOptimistic**: 
-  1. **Con reversión automática (lanzando error)**: 
-     ```jsx
-     startTransition(async () => {
-       try {
-         // Actualización optimista
-         setOptimisticItem({ value: newValue });
-         
-         // Operación real que puede fallar
-         await updateItem(item.id, { value: newValue });
-       } catch (error) {
-         // Almacenar el error para UI
-         setErrorMessage(error.message);
-         
-         // Lanzar el error para que useOptimistic revierta automáticamente
-         throw error; // Esto propagará el error - requiere Error Boundary
-       }
-     });
-     ```
-  
-  2. **Con reversión manual (sin propagar errores)**:
-     ```jsx
-     // Almacenar estado original
-     const originalRef = useRef(item);
-     
-     // Actualizar ref cuando cambia el item
-     useEffect(() => {
-       originalRef.current = item;
-     }, [item]);
-     
-     startTransition(async () => {
-       try {
-         // Actualización optimista
-         setOptimisticItem({ value: newValue });
-         
-         // Operación real que puede fallar
-         await updateItem(item.id, { value: newValue });
-       } catch (error) {
-         // Almacenar el error para UI
-         setErrorMessage(error.message);
-         
-         // Revertir manualmente sin propagar el error
-         setOptimisticItem({ value: originalRef.current.value });
-       }
-     });
-     ```
-
-- **Orden correcto**: Primero actualizar optimistamente, luego hacer la operación asíncrona
-- **Mantener actualizaciones optimistas visibles**: Asegurarse de que el usuario vea inmediatamente la actualización optimista
-- **Mostrar errores adecuadamente**: Almacenar los mensajes de error en el estado del componente para mostrarlos en la UI
+- **Comportamiento de reversión automática con useOptimistic**: 
+  useOptimistic revierte automáticamente al estado original cuando finaliza la transición:
+  ```jsx
+  startTransition(async () => {
+    try {
+      // Actualización optimista
+      setOptimisticItem({ value: newValue });
+      
+      // Operación real que puede fallar
+      await updateItem(item.id, { value: newValue });
+    } catch (error) {
+      // Almacenar el error para UI
+      setErrorMessage(error.message);
+      
+      // No es necesario hacer nada especial aquí
+      // La reversión es automática cuando finaliza la transición
+    }
+  });
+  ```
 
 ### 5. Manejo de errores simplificado
 La aplicación implementa un enfoque sencillo para el manejo de errores:

@@ -1,8 +1,7 @@
-import { useContext } from 'react';
-import { TodoContext } from './TodoContext';
+import { useTodoContext } from './TodoContext';
 
 export default function TodoFilter() {
-  const { filter, setFilter } = useContext(TodoContext);
+  const { filter, setFilter } = useTodoContext();
   
   return (
     <div className="flex justify-center p-2 space-x-2 bg-white rounded-lg border border-gray-200">

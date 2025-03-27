@@ -1,33 +1,34 @@
 import { useOptimistic, useState, useTransition } from 'react';
 import { CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { updateTodo, deleteTodo } from '../../server/api';
+import { useTodoContext } from './TodoContext';
 
 export default function TodoItem({ todo, category, priority }) {
+  const { todos } = useTodoContext();
   const [simulateError, setSimulateError] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState(null);
   
-
-  // Use optimistic for immediate UI updates
+  // Usar useOptimistic para actualizaciones inmediatas de la UI
   const [optimisticTodo, setOptimisticTodo] = useOptimistic(
     todo,
     (currentTodo, newValues) => ({ ...currentTodo, ...newValues })
   );
-  // Toggle todo completion
+  
+  // Alternar el estado de completado de la tarea
   async function toggleTodo() {
-    // Limpiar cualquier mensaje de error anterior
+    // Limpiar mensajes de error previos
     setErrorMessage(null);
     
-    // Iniciamos la transición 
     startTransition(async () => {
       try {
-        // 1. Aplicar actualización optimista inmediatamente
+        // 1. Aplicar la actualización optimista inmediatamente
         setOptimisticTodo({ completed: !todo.completed });
         
-        // 2. Añadir retraso deliberado para ver mejor el optimistic update
+        // 2. Retraso deliberado para demostración
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // 3. Simular un error si la opción está activada
+        // 3. Simular error si está activada la opción
         if (simulateError) {
           throw new Error("Network error: Failed to update todo");
         }
@@ -35,46 +36,37 @@ export default function TodoItem({ todo, category, priority }) {
         // 4. Realizar la actualización real en el servidor
         await updateTodo(todo.id, { completed: !todo.completed });
         
-        // 5. Si llegamos aquí, la operación fue exitosa
+        // 5. Refrescar la lista después de actualizar
+        todos.refresh();
       } catch (error) {
         console.error('Error updating todo:', error);
-        
-        // Guardar el mensaje de error para mostrarlo en el componente
         setErrorMessage(error.message);
-        
-        // Revertir manualmente en lugar de lanzar el error
-        // Normalmente useOptimistic lo haría automáticamente si lanzamos el error
-        // pero queremos evitar propagar errores fuera del componente
-        // setOptimisticTodo({ completed: originalStateRef.current.completed });
-        
-        // No lanzamos el error fuera de este bloque try/catch
+        // No propagar el error, solo registrarlo y mostrar el mensaje
       }
     });
   }
 
-  // Delete todo
+  // Eliminar tarea
   async function deleteTodoItem() {
-    // Limpiar cualquier mensaje de error anterior
+    // Limpiar mensajes de error previos
     setErrorMessage(null);
     
     startTransition(async () => {
       try {
-        // Añadir retraso deliberado
+        // Retraso deliberado para demostración
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Simular un error si la opción está activada
+        // Simular error si está activada la opción
         if (simulateError) {
           throw new Error("Failed to delete todo");
         }
         
+        // Eliminar la tarea y refrescar la lista
         await deleteTodo(todo.id);
-        // We'll need to refresh the todo list after deletion
-        // This would typically be handled by state management in the parent component
+        todos.refresh();
       } catch (error) {
         console.error('Error deleting todo:', error);
         setErrorMessage(error.message);
-        
-        // No lanzamos el error fuera de este bloque try/catch
       }
     });
   }

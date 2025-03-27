@@ -2,45 +2,6 @@
 
 Este proyecto es una demostración de las nuevas características de React 19, implementadas en una aplicación de lista de tareas (Todo).
 
-## Inicio Rápido
-
-```bash
-# Instalar dependencias
-npm install
-
-# Iniciar el servidor JSON (en una terminal)
-npm run server
-
-# Iniciar la aplicación React (en otra terminal)
-npm run dev
-```
-
-Una vez iniciado el servidor, puedes acceder a:
-- **Aplicación React**: http://localhost:5173
-- **Documentación web**: http://localhost:3001/docs
-- **API JSON**: http://localhost:3001
-
-## Servidor API de Pruebas
-
-La aplicación utiliza un servidor JSON personalizado para simular un backend:
-
-- **API Base**: `http://localhost:3001`
-- **Características**:
-  - Retraso simulado (300ms) para probar estados de carga
-  - Endpoints personalizados para filtrar tareas
-  - Rutas para estadísticas y datos relacionados
-
-### Endpoints Disponibles
-
-| Endpoint | Descripción |
-|----------|-------------|
-| `/todos` | Lista completa de tareas |
-| `/todos/active` | Solo tareas activas |
-| `/todos/completed` | Solo tareas completadas |
-| `/categories` | Categorías disponibles |
-| `/priorities` | Niveles de prioridad |
-| `/stats` | Estadísticas de las tareas |
-
 ## Características de React 19
 
 Esta aplicación demuestra varias características nuevas de React 19:
@@ -321,7 +282,30 @@ Este enfoque mantiene la simplicidad de la aplicación eliminando la necesidad d
 
 ## Soluciones a Problemas Comunes
 
+### Error con useActionState
+
+Según el PR #28491 de React, `useActionState` (anteriormente conocido como `useFormState`) se ha movido del paquete `react-dom` al paquete `react`.
+
+**Problema**: Si intentas importar `useActionState` desde `react-dom`, obtendrás el error:
+
+```jsx
+// Error que aparecerá en consola
+TypeError: useActionState is not a function or its return value is not iterable
+```
+
+**Solución**: Importar correctamente desde el paquete `react`:
+
+```jsx
+// ✅ Correcto: Importar desde react
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom'; // useFormStatus sigue en react-dom
+
+// ❌ Incorrecto: Causará error
+import { useActionState } from 'react-dom'; // Error
+```
+
 ### Ciclo de Suspensión Infinita con `use`
+
 Al utilizar la API `use` en componentes cliente, es importante crear las promesas fuera del componente. 
 
 **Problema**: Si se crean promesas dentro del componente durante el renderizado, cuando React suspende el componente debido a una promesa pendiente, al reanudar el renderizado se crearán nuevas promesas, causando un ciclo infinito.
@@ -345,22 +329,6 @@ function Component() {
 }
 ```
 
-### Error con useActionState
-Según el PR #28491 de React, `useActionState` (anteriormente conocido como `useFormState`) se ha movido del paquete `react-dom` al paquete `react`.
-
-**Problema**: Si intentas importar `useActionState` desde `react-dom`, obtendrás el error: `TypeError: useActionState is not a function or its return value is not iterable`.
-
-**Solución**: Importar correctamente desde el paquete `react`:
-
-```jsx
-// ✅ Correcto: Importar desde react
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom'; // useFormStatus sigue en react-dom
-
-// ❌ Incorrecto: Causará error
-import { useActionState } from 'react-dom'; // Error
-```
-
 ## Características No Implementadas (Mencionadas para Referencia)
 
 ### 1. React Server Components y Server Actions
@@ -381,26 +349,37 @@ import { useActionState } from 'react-dom'; // Error
 - Integración avanzada de hojas de estilo (stylesheets)
 - Mejor soporte para scripts asíncronos en componentes
 
-## Estructura del Proyecto
+## Estructura del proyecto
 
-```
-src/
-  ├── components/
-  │   ├── AddTodo.jsx      - useActionState, useFormStatus, form actions
-  │   ├── NameChange.jsx   - Ejemplo de uso correcto de useActionState con simulación de errores
-  │   ├── TodoContext.jsx  - New Context provider syntax
-  │   ├── TodoFilter.jsx   - Context consumer component
-  │   ├── TodoItem.jsx     - useOptimistic for UI updates con simulación de errores
-  │   ├── TodoList.jsx     - use API for async data
-  │   └── RefExample.jsx   - ref as prop in function components
-  │
-  ├── App.jsx              - Main application with Suspense
-  ├── main.jsx             - Entry point
-  └── index.css            - Styles with Tailwind
-server/
-  ├── api.js               - API client functions for data fetching
-  ├── json-server.js       - Configuración del servidor
-  └── routes.js            - Rutas personalizadas para json-server
+A continuación se muestra la estructura de archivos de este proyecto:
+
+```folder-tree
+react-19/
+├── src/
+│   ├── components/
+│   │   ├── TodoItem.jsx
+│   │   ├── TodoList.jsx
+│   │   ├── AddTodo.jsx
+│   │   ├── Documentation.jsx
+│   │   ├── Documentation.css
+│   │   ├── TodoFilter.jsx
+│   │   ├── TodoContext.jsx
+│   │   ├── NameChange.jsx
+│   │   └── RefExample.jsx
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── index.css
+│   └── App.css
+├── server/
+│   ├── api.js
+│   └── json-server.js
+├── scripts/
+│   └── prepare.js
+├── index.html
+├── vite.config.js
+├── package.json
+├── README.md
+└── REACT19_FEATURES.md
 ```
 
 ## Tecnologías Utilizadas

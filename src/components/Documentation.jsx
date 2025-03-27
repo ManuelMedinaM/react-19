@@ -1,4 +1,5 @@
 import { use, useState } from 'react';
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -59,7 +60,28 @@ function MarkdownContent({ showFeatures }) {
               <SyntaxHighlighter
                 style={vscDarkPlus}
                 language={match[1]}
-                PreTag="div"
+                PreTag={({ children, ...props }) => (
+                  <div {...props} data-language={match[1]}>
+                    {children}
+                  </div>
+                )}
+                showLineNumbers={true}
+                wrapLines={true}
+                wrapLongLines={false}
+                useInlineStyles={true}
+                customStyle={{
+                  backgroundColor: '#1e1e1e',
+                  textDecoration: 'none',
+                  WebkitTextDecoration: 'none',
+                  color: '#e6edf3'
+                }}
+                codeTagProps={{
+                  style: {
+                    textDecoration: 'none',
+                    WebkitTextDecoration: 'none',
+                    color: '#e6edf3'
+                  }
+                }}
                 {...props}
               >
                 {String(children).replace(/\n$/, '')}
@@ -70,6 +92,124 @@ function MarkdownContent({ showFeatures }) {
               </code>
             );
           },
+          // Personalización de párrafos para detectar listados de endpoints
+          p({ node, children, ...props }) {
+            // Detectar si el párrafo contiene enlaces que parecen endpoints
+            const hasEndpoints = node?.children?.some(child => 
+              child?.type === 'link' && child?.url?.startsWith('/'));
+            
+            // Detectar si tiene separadores pipe
+            const hasPipes = node?.children?.some(child => 
+              child?.type === 'text' && child?.value?.includes('|'));
+            
+            // Detectar si está bajo un encabezado de Endpoints
+            const isEndpointList = hasEndpoints && hasPipes;
+            
+            if (isEndpointList) {
+              // Procesar el contenido para encapsular el | en un span con estilo
+              const enhancedChildren = React.Children.map(children, child => {
+                // Si es texto y contiene pipe, transformarlo
+                if (typeof child === 'string' && child.includes('|')) {
+                  // Separar el texto por | y añadir estilo
+                  return child.split('|').map((part, index, array) => {
+                    if (index === array.length - 1) return part;
+                    return <React.Fragment key={index}>
+                      {part}<span className="pipe-separator">|</span>
+                    </React.Fragment>;
+                  });
+                }
+                return child;
+              });
+              
+              return (
+                <p {...props} className="endpoint-links">
+                  {enhancedChildren}
+                </p>
+              );
+            }
+            
+            return <p {...props}>{children}</p>;
+          },
+          // Personalizar listas para mejorar visualización de endpoints
+          ul({ node, children, ...props }) {
+            // Detectar si es una lista de endpoints
+            const isEndpointList = node?.children?.some(child => {
+              const firstChild = child?.children?.[0];
+              return firstChild?.children?.[0]?.type === 'strong' && 
+                    /GET|POST|PUT|DELETE|PATCH/i.test(firstChild?.children?.[0]?.children?.[0]?.value);
+            });
+            
+            return (
+              <ul className={isEndpointList ? 'endpoints' : undefined} {...props}>
+                {children}
+              </ul>
+            );
+          },
+          // Personalizar elementos de lista para endpoints
+          li({ node, children, ...props }) {
+            // Verificar si este item parece ser un endpoint
+            let isEndpoint = false;
+            let httpMethod = '';
+            
+            if (node?.children?.[0]?.children?.[0]?.type === 'strong') {
+              const methodText = node.children[0].children[0].children[0]?.value;
+              if (methodText && /GET|POST|PUT|DELETE|PATCH/i.test(methodText)) {
+                isEndpoint = true;
+                httpMethod = methodText.toUpperCase();
+              }
+            }
+            
+            // Si encontramos un elemento de endpoints, aplicar clases especiales
+            if (isEndpoint) {
+              // Modificar el children para añadir un atributo data-method al elemento strong
+              const modifiedChildren = React.Children.map(children, child => {
+                if (React.isValidElement(child) && child.type === 'strong') {
+                  return React.cloneElement(child, { 
+                    'data-method': httpMethod,
+                    className: `http-method ${httpMethod.toLowerCase()}`
+                  });
+                }
+                return child;
+              });
+              
+              return (
+                <li {...props} className="endpoint-item">
+                  {modifiedChildren}
+                </li>
+              );
+            }
+            
+            return <li {...props}>{children}</li>;
+          },
+          // Personalizar tablas para mejorar visualización de APIs
+          table({ node, children, ...props }) {
+            // Detectar si es una tabla de API
+            const isApiTable = node?.children?.[0]?.children?.[0]?.children?.some(cell => {
+              return /método|method|endpoint|ruta|path/i.test(cell?.children?.[0]?.value);
+            });
+            
+            return (
+              <table className={isApiTable ? 'api-table' : undefined} {...props}>
+                {children}
+              </table>
+            );
+          },
+          // Elemento strong para métodos HTTP
+          strong({ node, children, ...props }) {
+            const text = node?.children?.[0]?.value;
+            const isHttpMethod = text && /^(GET|POST|PUT|DELETE|PATCH)$/i.test(text);
+            
+            if (isHttpMethod) {
+              const method = text.toUpperCase();
+              return (
+                <strong {...props} data-method={method} className={`http-method ${method.toLowerCase()}`}>
+                  {children}
+                </strong>
+              );
+            }
+            
+            return <strong {...props}>{children}</strong>;
+          }
         }}
       >
         {markdownText}

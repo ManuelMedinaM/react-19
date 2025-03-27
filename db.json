@@ -1,0 +1,122 @@
+{
+  "todos": [
+    {
+      "id": "2",
+      "title": "Test useOptimistic for UI updates",
+      "completed": false,
+      "category": "react19",
+      "priority": "medium"
+    },
+    {
+      "id": "3",
+      "title": "Implement form Actions",
+      "completed": false,
+      "category": "react19",
+      "priority": "high"
+    },
+    {
+      "id": "4",
+      "title": "Try the new 'use' API with async data",
+      "completed": false,
+      "category": "react19",
+      "priority": "medium"
+    },
+    {
+      "id": "5",
+      "title": "Test Context provider syntax",
+      "completed": false,
+      "category": "react19",
+      "priority": "medium"
+    },
+    {
+      "id": "6",
+      "title": "Learn about ref as prop in function components",
+      "completed": false,
+      "category": "react19",
+      "priority": "low"
+    },
+    {
+      "id": "7",
+      "title": "Explore Server Components",
+      "completed": false,
+      "category": "advanced",
+      "priority": "high"
+    },
+    {
+      "id": "8",
+      "title": "Read React 19 documentation",
+      "completed": true,
+      "category": "learning",
+      "priority": "high"
+    },
+    {
+      "id": "9",
+      "title": "Explore prerender API",
+      "completed": false,
+      "category": "advanced",
+      "priority": "low"
+    },
+    {
+      "id": "10",
+      "title": "Watch React 19 release video",
+      "completed": true,
+      "category": "learning",
+      "priority": "medium"
+    },
+    {
+      "id": "6b19",
+      "title": "Pendiente de hacer",
+      "completed": false,
+      "category": "react19",
+      "priority": "low"
+    },
+    {
+      "id": "0e03",
+      "title": "Nueva",
+      "completed": false,
+      "category": "react19",
+      "priority": "medium"
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "name": "react19",
+      "color": "#61dafb"
+    },
+    {
+      "id": "2",
+      "name": "advanced",
+      "color": "#ff6b6b"
+    },
+    {
+      "id": "3",
+      "name": "learning",
+      "color": "#82c91e"
+    }
+  ],
+  "priorities": [
+    {
+      "id": "1",
+      "name": "low",
+      "value": 1
+    },
+    {
+      "id": "2",
+      "name": "medium",
+      "value": 2
+    },
+    {
+      "id": "3",
+      "name": "high",
+      "value": 3
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "name": "Demo User",
+      "avatar": "https://i.pravatar.cc/150?u=demouser"
+    }
+  ]
+}

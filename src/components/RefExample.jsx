@@ -6,7 +6,7 @@ const RefForwardedButton = forwardRef(function RefForwardedButton(props, ref) {
   return (
     <button 
       ref={ref} 
-      className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+      className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 shadow-md transition-all duration-200"
       {...props}
     >
       {props.children}
@@ -19,7 +19,7 @@ const LegacyButton = forwardRef((props, ref) => {
   return (
     <button 
       ref={ref} 
-      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+      className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 shadow-md transition-all duration-200"
       {...props}
     >
       {props.children}
@@ -37,7 +37,7 @@ export default function RefExample() {
   }
   
   return (
-    <div className="p-4 bg-white rounded-lg border border-gray-200">
+    <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
       <h2 className="text-lg font-semibold mb-3">React 19 Ref Features</h2>
       
       <div className="flex flex-col space-y-3">

@@ -30,10 +30,10 @@ function FilterButton({ label, isActive, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1 rounded-md ${
+      className={`px-3 py-1 rounded-md transition-colors duration-200 ${
         isActive 
-          ? 'bg-blue-500 text-white' 
-          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          ? 'bg-indigo-600 text-white shadow-md' 
+          : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
       }`}
     >
       {label}

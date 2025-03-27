@@ -16,8 +16,8 @@ function SubmitButton() {
     <button 
       type="submit" 
       disabled={pending}
-      className={`px-4 py-2 text-white rounded-lg ${
-        pending ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'
+      className={`px-4 py-2 text-white rounded-lg transition-all duration-200 ${
+        pending ? 'bg-indigo-400 animate-pulse' : 'bg-indigo-600 hover:bg-indigo-700 shadow-md'
       }`}
     >
       {pending ? 'Adding...' : 'Add Todo'}
@@ -46,6 +46,9 @@ export default function AddTodo() {
     };
     
     try {
+      // Añadir retraso deliberado para mejor visualización del estado pendiente
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       await addTodo(newTodo);
       // Form will reset automatically for uncontrolled inputs when action succeeds
       return { success: true, error: null };
@@ -60,7 +63,7 @@ export default function AddTodo() {
   const [formState, submitAction, isPending] = useActionState(handleAddTodo, null);
   
   return (
-    <form action={submitAction} className="flex flex-col gap-3 p-4 bg-white rounded-lg border border-gray-200">
+    <form action={submitAction} className="flex flex-col gap-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
           Title
@@ -70,10 +73,13 @@ export default function AddTodo() {
           id="title"
           name="title"
           placeholder="Add a new todo..."
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         />
         {formState?.error && (
           <p className="mt-1 text-sm text-red-500">{formState.error}</p>
+        )}
+        {formState?.success && (
+          <p className="mt-1 text-sm text-green-500">Todo added successfully!</p>
         )}
       </div>
       
@@ -85,7 +91,7 @@ export default function AddTodo() {
           <select 
             id="category" 
             name="category"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             defaultValue="react19"
           >
             {categories.map(category => (
@@ -103,7 +109,7 @@ export default function AddTodo() {
           <select 
             id="priority" 
             name="priority"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             defaultValue="medium"
           >
             {priorities.map(priority => (
@@ -120,8 +126,8 @@ export default function AddTodo() {
       </div>
       
       {isPending && (
-        <div className="mt-2 text-sm text-blue-500">
-          Processing your request...
+        <div className="mt-2 text-sm text-indigo-500 animate-pulse">
+          Processing your request... Please wait
         </div>
       )}
     </form>

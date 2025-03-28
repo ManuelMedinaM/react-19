@@ -12,17 +12,11 @@ const jsonServer = require('json-server');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Determine static folder based on environment
-const isProduction = process.env.NODE_ENV === 'production';
-const staticPath = isProduction 
-  ? join(__dirname, '../dist') 
-  : join(__dirname, 'public');
-
 // Create server
 const server = jsonServer.create();
 const router = jsonServer.router(join(__dirname, './db.json'));   
 const middlewares = jsonServer.defaults({
-  static: staticPath
+  static: join(__dirname, 'public')
 });
 
 // Configure middleware
@@ -39,8 +33,7 @@ server.get('/cats', (req, res) => {
   res.jsonp(todos);
 });
 
-// Use default router for API endpoints
-server.use('/api', router);
+// Use default router
 server.use(router);
 
 // Endpoint para devolver la estructura del proyecto
@@ -91,23 +84,12 @@ server.use((req, res, next) => {
   next();
 });
 
-// In production, serve the frontend for any non-API routes
-if (isProduction) {
-  server.get('*', (req, res) => {
-    res.sendFile(join(staticPath, 'index.html'));
-  });
-}
-
 // Start server
 const PORT = process.env.PORT || 3001;
 const HOST = process.env.HOST || '0.0.0.0';
 
 server.listen(PORT, HOST, () => {
-  console.log(`Server is running on http://${HOST}:${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  if (isProduction) {
-    console.log(`Serving frontend from ${staticPath}`);
-  } else {
-    console.log(`API available at http://localhost:${PORT}`);
-  }
+  console.log(`JSON Server is running on http://${HOST}:${PORT}`);
+  console.log(`Access the API at http://localhost:${PORT}`);
+  console.log(`View documentation at http://localhost:${PORT}/docs`);
 }); 

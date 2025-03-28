@@ -10,13 +10,7 @@
     "preview": "vite preview",
     "server": "node server/json-server.js",
     "server:simple": "json-server --watch ./server/db.json --port 3001 --host 0.0.0.0",
-    "start": "concurrently \"npm run dev\" \"npm run server\"",
-    "docker:build": "docker build -t react19-app .",
-    "docker:prod": "docker run -p 3001:3001 -e NODE_ENV=production react19-app",
-    "docker:dev:win": "docker run -p 3001:3001 -p 5173:5173 -e NODE_ENV=development -v \"%cd%\":/app react19-app /bin/sh -c \"npm install && npm start\"",
-    "docker:dev:unix": "docker run -p 3001:3001 -p 5173:5173 -e NODE_ENV=development -v \"$(pwd)\":/app react19-app /bin/sh -c \"npm install && npm start\"",
-    "docker:dev": "npm run docker:dev:win",
-    "docker:dev:alt": "docker run -p 3001:3001 -p 5173:5173 -e NODE_ENV=development -v \"%cd%\":/app react19-app /bin/sh ./scripts/docker-dev.sh"
+    "start": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

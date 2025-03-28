@@ -78,7 +78,7 @@ server.get('/api/project-structure', (req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`JSON Server is running on port ${PORT}`);
   console.log(`Access the API at http://localhost:${PORT}`);

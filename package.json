@@ -4,12 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development node scripts/prepare.js && vite",
+    "dev": "cross-env NODE_ENV=development node scripts/prepare.js && vite --host",
     "build": "cross-env NODE_ENV=production node scripts/prepare.js && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "node server/json-server.js",
-    "server:simple": "json-server --watch ./server/db.json --port 3001",
+    "server:simple": "json-server --watch ./server/db.json --port 3001 --host 0.0.0.0",
     "start": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {

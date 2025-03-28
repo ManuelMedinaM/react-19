@@ -77,10 +77,19 @@ server.get('/api/project-structure', (req, res) => {
   }, 500);
 });
 
+// Add CORS headers to allow cross-origin requests
+server.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+
 // Start server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`JSON Server is running on port ${PORT}`);
+const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '0.0.0.0';
+
+server.listen(PORT, HOST, () => {
+  console.log(`JSON Server is running on http://${HOST}:${PORT}`);
   console.log(`Access the API at http://localhost:${PORT}`);
   console.log(`View documentation at http://localhost:${PORT}/docs`);
 }); 

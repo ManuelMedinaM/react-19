@@ -11,7 +11,7 @@ const __dirname = dirname(__filename)
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    port: 5173,
+    port: 80,
     // Configurar el historial de modo que todas las rutas se dirijan a index.html
     historyApiFallback: true,
     watch: {

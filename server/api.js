@@ -3,11 +3,12 @@
  * These functions demonstrate how to interact with the JSON Server API
  */
 
-// Base URL for the API
-// const API_URL = 'https://todosmm.free.beeceptor.com';
+// Base URL for the API - dynamically determined based on environment
+const BASE_URL = import.meta.env?.PROD 
+  ? '' // In production, use relative URLs since API and frontend are served from same domain
+  : 'http://localhost:3001';
 
-const API_URL = 'http://localhost:3001';
-
+const API_URL = `${BASE_URL}`;
 
 /**
  * Fetch all todos with optional filters

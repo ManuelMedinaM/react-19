@@ -1,14 +1,14 @@
 {
   "todos": [
     {
-      "title": "hola",
+      "title": "tarea2",
       "completed": true,
       "category": "react19",
       "priority": "medium",
       "id": 1
     },
     {
-      "title": "adios",
+      "title": "tarea1",
       "completed": false,
       "category": "react19",
       "priority": "medium",

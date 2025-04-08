@@ -1,0 +1,59 @@
+{
+  "todos": [
+    {
+      "title": "tarea2",
+      "completed": true,
+      "category": "react19",
+      "priority": "medium",
+      "id": 1
+    },
+    {
+      "title": "tarea1",
+      "completed": false,
+      "category": "react19",
+      "priority": "medium",
+      "id": 2
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "name": "react19",
+      "color": "#61dafb"
+    },
+    {
+      "id": "2",
+      "name": "advanced",
+      "color": "#ff6b6b"
+    },
+    {
+      "id": "3",
+      "name": "learning",
+      "color": "#82c91e"
+    }
+  ],
+  "priorities": [
+    {
+      "id": "1",
+      "name": "low",
+      "value": 1
+    },
+    {
+      "id": "2",
+      "name": "medium",
+      "value": 2
+    },
+    {
+      "id": "3",
+      "name": "high",
+      "value": 3
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "name": "Demo User",
+      "avatar": "https://i.pravatar.cc/150?u=demouser"
+    }
+  ]
+}

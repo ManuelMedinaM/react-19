@@ -13,6 +13,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    allowedHosts: ['react-19-vj2v.onrender.com'],
     // Configurar el historial de modo que todas las rutas se dirijan a index.html
     historyApiFallback: true,
     watch: {

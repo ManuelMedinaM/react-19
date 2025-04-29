@@ -6,7 +6,7 @@
 // Base URL for the API
 // const API_URL = 'https://todosmm.free.beeceptor.com';
 
-const API_URL = 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 
 /**

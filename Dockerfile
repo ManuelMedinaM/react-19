@@ -11,7 +11,8 @@ RUN npm install
 COPY . .
 
 # Exponer puertos: 5173 para el frontend (Vite) y 3001 para el backend (JSON Server)
-EXPOSE 5173 3001
+EXPOSE 3001
+EXPOSE 5173
 
 # Configurar variables de entorno para permitir override del puerto
 ENV PORT=5173

@@ -118,8 +118,8 @@ server.use((req, res, next) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 3001;
-const HOST = process.env.HOST || '0.0.0.0';
+const PORT = 3001;
+const HOST = '0.0.0.0';
 
 // Store initial data before starting server
 storeInitialData().then(() => {

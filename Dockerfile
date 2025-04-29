@@ -14,8 +14,7 @@ COPY . .
 EXPOSE 5173 3001
 
 # Configurar variables de entorno para permitir override del puerto
-ENV PORT=3001
-ENV HOST=0.0.0.0
+ENV PORT=5173
 
 # Ejecutar directamente el comando start del package.json
 CMD ["npm", "start"] 

@@ -14,7 +14,5 @@ COPY . .
 # Expose Vite port
 EXPOSE 5173
 
-ENV VITE_API_URL=http://localhost:3001
-
 # Start Vite dev server
 CMD ["npm", "run", "dev"] 
